@@ -1,8 +1,8 @@
 import ollama
 
-context = "RAG (Retrieval-Augmented Generation) is a technique where a program first retrieves relevant documents, then gives them to an LLM along with the question so the answer is based on those documents."
+context = "Xi lives in Malmö and has a dog."
 
-question = "In one sentence, what is RAG?"
+question = "What is Xi's favorite color?"
 
 response = ollama.chat(
     model="llama3.2",
