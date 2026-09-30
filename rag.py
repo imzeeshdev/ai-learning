@@ -25,7 +25,7 @@ def load_chunks():
 
 
 def retrieve(question, items, vectors, k=3):
-    q_vec = embed([question])[0]
+    q_vec = embed(["search_query: " + question])[0]
     scored = [(cosine(q_vec, v), item) for v, item in zip(vectors, items)]
     scored.sort(key=lambda pair: pair[0], reverse=True)
     return scored[:k]
@@ -44,25 +44,24 @@ def answer(question, hits):
     )
     return response["message"]["content"]
 
+def main():
+    items = load_chunks()
+    print(f"Embedding {len(items)} chunks...")
+    vectors = embed(["search_document: " + item["text"] for item in items])
+    MIN_SCORE = 0.55
 
-items = load_chunks()
-print(f"Embedding {len(items)} chunks...")
-vectors = embed([item["text"] for item in items])
+    while True:
+        question = input("\nAsk a question (or type quit): ")
+        if question.strip().lower() == "quit":
+            break
+        hits = retrieve(question, items, vectors)
+        if hits[0][0] < MIN_SCORE:
+            print("I couldn't find anything relevant in the documents.")
+            continue
+        print(answer(question, hits))
+        print("\nSources:")
+        for score, item in hits:
+            print(f"  {score:.2f}  {item['source']} (page {item['page']})")
 
-MIN_SCORE = 0.55
-
-while True:
-    question = input("\nAsk a question (or type quit): ")
-    if question.strip().lower() == "quit":
-        break
-    hits = retrieve(question, items, vectors)
-    if hits[0][0] < MIN_SCORE:
-        print("I couldn't find anything relevant in the documents.")
-        continue
-    print(answer(question, hits))
-    print("\nSources:")
-    for score, item in hits:
-        print(f"  {score:.2f}  {item['source']} (page {item['page']})")
-
-
-
+if __name__ == "__main__":
+    main()
